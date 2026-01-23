@@ -4,8 +4,8 @@ import User from "@/app/models/user";
 
 export async function POST(request) {
   const body = await request.json();
-  const { email, password, fullName } = body;
-  // console.log(body);
+  let { email, password, fullName } = body;
+
   try {
     if (!email || !password || !fullName) {
       return NextResponse.json(
@@ -13,6 +13,9 @@ export async function POST(request) {
         { status: 400 },
       );
     }
+
+    // Normalizar email: trim y minúsculas para evitar duplicados por formato
+    email = String(email).trim().toLowerCase();
 
     // Validar que password sea un string
     if (typeof password !== "string") {
@@ -22,11 +25,28 @@ export async function POST(request) {
       );
     }
 
+    // Validar longitud de la contraseña ANTES de hashearla
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters long" },
+        { status: 400 },
+      );
+    }
+
+    // Comprobar si el email ya existe (usando el email normalizado)
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Email already exists" },
+        { status: 400 },
+      );
+    }
+
     const hashedPassword = passwordHash(password);
     const user = await User.create({
       email,
       password: hashedPassword,
-      fullName,
+      fullName: fullName.trim(),
     });
     
     // Convertir a objeto y eliminar el password antes de retornar
@@ -51,12 +71,10 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-    // Manejar errores de duplicado (email único)
+    // Manejar errores de duplicado (email único), p. ej. condición de carrera
     if (error.code === 11000) {
       return NextResponse.json(
-        {
-          error: "Email already exists",
-        },
+        { error: "Email already exists" },
         { status: 400 },
       );
     }
