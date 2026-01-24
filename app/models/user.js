@@ -78,9 +78,25 @@ User.find = async function(...args) {
     return originalFind(...args);
 };
 
-User.findOne = async function(...args) {
-    await ensureConnection();
-    return originalFindOne(...args);
+User.findOne = function(...args) {
+    // Ensure connection, but don't await - let the query handle it
+    // Return the query object so methods like .select() can be chained
+    const query = originalFindOne(...args);
+    // Ensure connection when query is executed
+    const originalExec = query.exec.bind(query);
+    query.exec = async function(...execArgs) {
+        await ensureConnection();
+        return originalExec(...execArgs);
+    };
+    // Also handle .then() for promise-like behavior
+    const originalThen = query.then?.bind(query);
+    if (originalThen) {
+        query.then = async function(...thenArgs) {
+            await ensureConnection();
+            return originalThen(...thenArgs);
+        };
+    }
+    return query;
 };
 
 User.findById = async function(...args) {
