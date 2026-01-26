@@ -51,7 +51,7 @@ export async function POST(request) {
     
     // Convertir a objeto y eliminar el password antes de retornar
     const userObject = user.toObject(); // Convertir a objeto
-    delete userObject.password;
+    delete userObject.password; // Eliminar el password antes de retornar
     
     return NextResponse.json(
       { message: "User created successfully", user: userObject },

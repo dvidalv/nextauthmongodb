@@ -1,0 +1,161 @@
+.footer_modern {
+	background-color: #111;
+	color: #fff;
+	padding: 60px 0 0 0;
+	width: 100%;
+	font-family: var(--font-primary);
+}
+
+.footer_container {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 40px;
+	padding-bottom: 60px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+@media (min-width: 768px) {
+	.footer_container {
+		grid-template-columns: 1.5fr 1fr 1fr;
+		padding-left: 0;
+		padding-right: 0;
+	}
+}
+
+/* Titles */
+.footer_column h3 {
+	font-size: 1.2rem;
+	font-weight: 700;
+	color: #fff;
+	margin-bottom: 20px;
+	position: relative;
+	display: inline-block;
+}
+
+.footer_column h3::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	bottom: -5px;
+	width: 40px;
+	height: 3px;
+	background-color: var(--color-primary);
+	border-radius: 2px;
+}
+
+/* Brand Column */
+.footer_logo {
+	width: 150px;
+	margin-bottom: 20px;
+}
+
+.footer_description {
+	color: #aaa;
+	font-size: 0.95rem;
+	line-height: 1.6;
+	margin-bottom: 25px;
+	max-width: 300px;
+}
+
+.footer_socials {
+	display: flex;
+	gap: 15px;
+}
+
+.footer_socials a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 50%;
+	color: #fff;
+	font-size: 1.2rem;
+	transition: all 0.3s ease;
+}
+
+.footer_socials a:hover {
+	background-color: var(--color-primary);
+	transform: translateY(-3px);
+}
+
+/* Links Column */
+.footer_links {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.footer_links li {
+	margin-bottom: 12px;
+}
+
+.footer_links a {
+	color: #aaa;
+	text-decoration: none;
+	font-size: 1rem;
+	transition: color 0.3s ease, padding-left 0.3s ease;
+	display: inline-block;
+}
+
+.footer_links a:hover {
+	color: var(--color-primary);
+	padding-left: 5px;
+}
+
+/* Contact Column */
+.contact_item {
+	display: flex;
+	align-items: flex-start;
+	gap: 15px;
+	margin-bottom: 20px;
+}
+
+.contact_icon {
+	color: var(--color-primary);
+	font-size: 1.4rem;
+	margin-top: 3px;
+	flex-shrink: 0;
+}
+
+.contact_label {
+	color: #fff;
+	font-weight: 600;
+	margin: 0 0 5px 0;
+	font-size: 1rem;
+}
+
+.contact_text {
+	color: #aaa;
+	text-decoration: none;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	transition: color 0.3s ease;
+	display: block;
+}
+
+.contact_text:hover {
+	color: #fff;
+}
+
+.phone_links {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+/* Footer Bottom */
+.footer_bottom {
+	background-color: #080808;
+	padding: 20px 0;
+	text-align: center;
+	color: #777;
+	font-size: 0.9rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer_bottom p {
+	margin: 0;
+}

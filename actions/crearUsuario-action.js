@@ -13,6 +13,8 @@ export async function crearUsuario(prevState, formData) {
             { validateStatus: () => true }
         );
 
+        // console.log("response:", response);
+
         if (response.status !== 201) {
             const msg = response.data?.error || response.data?.details?.join?.(", ") || "Error al crear el usuario";
             return { error: msg, success: null };

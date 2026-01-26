@@ -1,137 +1,524 @@
-.container {
-  min-height: 100vh;
+.heroContainer {
+  min-height: calc(100vh - var(--headerHeight));
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background: #000;
+  padding: 40px 20px;
 }
 
-.content {
-  background: white;
-  border-radius: 20px;
-  padding: 60px 50px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
+.heroContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1400px;
   width: 100%;
-  text-align: center;
-  animation: fadeIn 0.6s ease-in;
+  align-items: center;
 }
 
-@keyframes fadeIn {
+.heroText {
+  padding: 40px;
+  animation: fadeInLeft 0.8s ease-out;
+}
+
+@keyframes fadeInLeft {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateX(-30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-.title {
-  font-size: 48px;
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -1px;
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.description {
-  font-size: 18px;
-  color: #666;
-  line-height: 1.6;
+.heroTitle {
+  font-size: 48px;
+  font-weight: 700;
+  color: #ff6b35;
+  margin: 0 0 30px 0;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.heroDescription {
+  font-size: 16px;
+  color: #ccc;
+  line-height: 1.8;
   margin: 0 0 40px 0;
 }
 
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.primaryButton,
-.secondaryButton {
+.ctaButton {
   display: inline-block;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 16px;
+  padding: 18px 40px;
+  background: #ff6b35;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
   text-decoration: none;
+  border-radius: 6px;
   transition: all 0.3s ease;
-  cursor: pointer;
-  border: 2px solid transparent;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
-.primaryButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.primaryButton:hover {
+.ctaButton:hover {
+  background: #ff8555;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
 }
 
-.secondaryButton {
-  background: transparent;
-  color: #667eea;
-  border-color: #667eea;
+.heroImage {
+  position: relative;
+  animation: fadeInRight 0.8s ease-out;
 }
 
-.secondaryButton:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+.image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-@media (max-width: 600px) {
-  .content {
-    padding: 40px 30px;
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 20px;
   }
 
-  .title {
+  .heroText {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .heroTitle {
     font-size: 36px;
   }
 
-  .description {
-    font-size: 16px;
+  .heroDescription {
+    font-size: 15px;
   }
 
-  .primaryButton,
-  .secondaryButton {
-    padding: 12px 24px;
-    font-size: 15px;
+  .heroImage {
+    order: -1;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .content {
-    background: #1a1a1a;
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 28px;
+    margin-bottom: 20px;
   }
 
-  .title {
-    background: linear-gradient(135deg, #8b9aff 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .heroDescription {
+    font-size: 14px;
+    margin-bottom: 30px;
   }
 
-  .description {
-    color: #ccc;
+  .ctaButton {
+    padding: 16px 32px;
+    font-size: 13px;
   }
 
-  .secondaryButton {
-    color: #8b9aff;
-    border-color: #8b9aff;
+  .heroText {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroContainer {
+    padding: 20px 10px;
   }
 
-  .secondaryButton:hover {
-    background: #8b9aff;
-    color: #1a1a1a;
+  .heroTitle {
+    font-size: 24px;
+  }
+
+  .heroDescription {
+    font-size: 13px;
+  }
+
+  .ctaButton {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Services Section */
+.servicesSection {
+  padding: 80px 20px;
+  background: #e8e8e8;
+}
+
+.servicesTitle {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 700;
+  color: #ff6b35;
+  margin: 0 0 60px 0;
+  letter-spacing: -0.5px;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 3D Card Container */
+.cardContainer {
+  perspective: 1000px;
+  height: 400px;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.cardContainer:hover .card {
+  transform: rotateY(180deg);
+}
+
+/* Card Front and Back Shared Styles */
+.cardFront,
+.cardBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Front */
+.cardFront {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.iconWrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 25px;
+  background: #3a3a3a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #ff6b35;
+  transition: all 0.3s ease;
+}
+
+.cardContainer:hover .iconWrapper {
+  background: #ff6b35;
+  color: white;
+  transform: scale(1.1);
+}
+
+.serviceTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 15px 0;
+}
+
+.serviceDescription {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Card Back */
+.cardBack {
+  background: white;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.backTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+}
+
+.backSubtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+}
+
+.backList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.backList li {
+  font-size: 14px;
+  color: #444;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  line-height: 1.5;
+}
+
+.backList li:last-child {
+  border-bottom: none;
+}
+
+/* Responsive Services Section */
+@media (max-width: 1024px) {
+  .servicesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+
+  .servicesTitle {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 768px) {
+  .servicesSection {
+    padding: 60px 20px;
+  }
+
+  .servicesTitle {
+    font-size: 32px;
+    margin-bottom: 40px;
+  }
+
+  .servicesGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .cardContainer {
+    height: 380px;
+  }
+
+  .cardFront,
+  .cardBack {
+    padding: 30px 25px;
+  }
+
+  .iconWrapper {
+    width: 70px;
+    height: 70px;
+    font-size: 30px;
+  }
+
+  .serviceTitle {
+    font-size: 20px;
+  }
+
+  .serviceDescription {
+    font-size: 14px;
+  }
+
+  .backTitle {
+    font-size: 20px;
+  }
+
+  .backSubtitle {
+    font-size: 13px;
+  }
+
+  .backList li {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicesTitle {
+    font-size: 28px;
+  }
+
+  .cardContainer {
+    height: 360px;
+  }
+
+  .cardFront,
+  .cardBack {
+    padding: 25px 20px;
+  }
+}
+
+/* Clients Section */
+.clientsSection {
+  padding: 80px 20px;
+  background: #2a2a2a;
+}
+
+.clientsTitle {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 700;
+  color: #ff6b35;
+  margin: 0 0 60px 0;
+  letter-spacing: -0.5px;
+}
+
+.clientsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.clientCard {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clientCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.clientLogo {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.logoImage {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.clientName {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 15px 0;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clientDescription {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.7;
+  margin: 0 0 25px 0;
+  flex-grow: 1;
+}
+
+.visitButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: #ff6b35;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.visitButton:hover {
+  background: #ff8555;
+  transform: translateX(5px);
+  gap: 12px;
+}
+
+/* Responsive Clients Section */
+@media (max-width: 1024px) {
+  .clientsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+
+  .clientsTitle {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 768px) {
+  .clientsSection {
+    padding: 60px 20px;
+  }
+
+  .clientsTitle {
+    font-size: 32px;
+    margin-bottom: 40px;
+  }
+
+  .clientsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .clientCard {
+    padding: 30px 25px;
+  }
+
+  .clientName {
+    font-size: 18px;
+    min-height: 40px;
+  }
+
+  .clientDescription {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .clientsTitle {
+    font-size: 28px;
+  }
+
+  .clientCard {
+    padding: 25px 20px;
+  }
+
+  .clientLogo {
+    height: 80px;
   }
 }

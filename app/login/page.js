@@ -2,19 +2,30 @@
 import styles from "./page.module.css";
 import Link from "next/link";
 import { useActionState } from "react";
-// TODO: Importar acción de login cuando esté disponible
-// import { loginUsuario } from "@/actions/loginUsuario-action";
-import { signinUsuarioAction } from "@/actions/signinUsuarioAction";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { loginUsuario } from "@/actions/loginUsuario-action";
 
 export default function Login() {
-  // TODO: Implementar cuando la acción de login esté disponible
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  
   const [state, action, isPending] = useActionState(
-    signinUsuarioAction,
+    loginUsuario,
     {
       error: null,
       success: null,
+      redirect: null,
     }
   );
+
+  // Redirigir cuando el login sea exitoso
+  useEffect(() => {
+    if (state.redirect) {
+      router.push(state.redirect);
+    }
+  }, [state.redirect, router]);
 
   return (
     <div className={styles.login}>
@@ -22,6 +33,7 @@ export default function Login() {
         <h1 className={styles.title}>Iniciar Sesión</h1>
         <p className={styles.subtitle}>Ingresa a tu cuenta</p>
         <form className={styles.form} action={action}>
+          <input type="hidden" name="callbackUrl" value={callbackUrl} />
           <input
             type="email"
             name="email"
