@@ -6,8 +6,8 @@ import logo from "@/public/logo.png";
 export default function Header() {
     const navItems = [
         { label: "Inicio", href: "/" },
-        { label: "Servicios", href: "/servicios" },
         { label: "Nosotros", href: "/nosotros" },
+        { label: "Servicios", href: "/servicios" },
         { label: "Clientes", href: "/clientes" },
         { label: "Contacto", href: "/contacto" },
         { label: "Login", href: "/login" }
