@@ -1,17 +1,18 @@
 "use server";
 import { signIn } from "@/auth";
+import { redirect } from "next/navigation";
 
 export async function loginUsuario(prevState, formData) {
   const email = formData.get("email");
   const password = formData.get("password");
-  const callbackUrl = formData.get("callbackUrl"); // Obtener callbackUrl del formData
+  const callbackUrl = formData.get("callbackUrl") || "/dashboard";
 
   try {
     // Usar NextAuth signIn con el provider de credentials
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: false, // No redirigir automáticamente, manejarlo en el cliente
+      redirect: false, // No redirigir automáticamente, manejarlo manualmente
     });
 
     if (result?.error) {
@@ -19,16 +20,14 @@ export async function loginUsuario(prevState, formData) {
       return { error: "Credenciales inválidas", success: null, redirect: null };
     }
 
-    // Si el login es exitoso, retornar éxito con la ruta de redirección
-    // Usar callbackUrl si existe, sino usar /dashboard por defecto
-    const redirectTo = callbackUrl || "/dashboard";
-    
-    return { 
-      error: null, 
-      success: "Inicio de sesión exitoso", 
-      redirect: redirectTo 
-    };
+    // Si el login es exitoso, redirigir directamente desde el servidor
+    redirect(callbackUrl);
   } catch (error) {
+    // Si el error es de redirect, dejarlo pasar (es el comportamiento esperado)
+    if (error?.message === "NEXT_REDIRECT") {
+      throw error;
+    }
+    
     console.error("Error en loginUsuario:", error);
     return { error: "Error al iniciar sesión", success: null, redirect: null };
   }

@@ -2,12 +2,10 @@
 import styles from "./page.module.css";
 import Link from "next/link";
 import { useActionState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { loginUsuario } from "@/actions/loginUsuario-action";
 
 export default function Login() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   
@@ -19,13 +17,6 @@ export default function Login() {
       redirect: null,
     }
   );
-
-  // Redirigir cuando el login sea exitoso
-  useEffect(() => {
-    if (state.redirect) {
-      router.push(state.redirect);
-    }
-  }, [state.redirect, router]);
 
   return (
     <div className={styles.login}>
