@@ -20,8 +20,9 @@ function Footer() {
 					<Image 
 						src="/logo.png" 
 						alt="Giganet Logo" 
-						width={150} 
+						width={50} 
 						height={50} 
+						style={{ width: 'auto', height: 'auto' }}
 						className="footer_logo" 
 					/>
 					<p className="footer_description">

@@ -48,7 +48,8 @@ export const getLocation = async (setLocationStatus) => {
 
 		setLocationStatus(`Ubicación: ${city}`);
 	} catch (error) {
-		console.log(error.message);
+		console.log(error.message);         
 		setLocationStatus('Error al obtener la ubicación');
 	}
 };
+

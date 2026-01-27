@@ -53,6 +53,12 @@
   gap: 20px;
 }
 
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .input {
   width: 100%;
   padding: 14px 18px;
@@ -74,6 +80,36 @@
 
 .input::placeholder {
   color: #999;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+.inputError:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.fieldError {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  padding-left: 4px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .textarea {
@@ -227,6 +263,20 @@
   .input::placeholder,
   .textarea::placeholder {
     color: #666;
+  }
+
+  .inputError {
+    border-color: #ef4444 !important;
+    background: #3f1f1f !important;
+  }
+
+  .inputError:focus {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+  }
+
+  .fieldError {
+    color: #fca5a5;
   }
 
   .error {

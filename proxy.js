@@ -29,7 +29,7 @@ export default auth((req) => {
   return NextResponse.next()
 })
 
-// Configurar qué rutas deben ejecutar el middleware
+// Configurar qué rutas deben ejecutar el proxy
 export const config = {
   matcher: [
     /*
