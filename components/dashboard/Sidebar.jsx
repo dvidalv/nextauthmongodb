@@ -8,7 +8,6 @@ export default function Sidebar({ user }) {
 
 
     const { name, email } = user;
-    console.log(name, email);
     const pathname = usePathname();
     const navItems = [
         { label: "Dashboard", href: "/dashboard", icon: "🏠" },

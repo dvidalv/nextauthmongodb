@@ -6,7 +6,7 @@ import styles from "./header.module.css";
 
 export default function HeaderNav({ isLoggedIn }) {
     const pathname = usePathname();
-    console.log(pathname);
+
 
     const navItems = [
         { label: "Inicio", href: "/" },
