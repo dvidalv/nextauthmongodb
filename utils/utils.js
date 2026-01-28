@@ -1,7 +1,6 @@
 
 import bcrypt from "bcryptjs";
 import User from "@/app/models/user";
-
 export const passwordHash = (password) => {
     return bcrypt.hashSync(password, 10);
 }

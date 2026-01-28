@@ -1,6 +1,8 @@
 import styles from "./page.module.css";
-
-export default function Dashboard() {
+import { getAllUsers } from "@/app/models/user";
+export default async function Dashboard() {
+    const users = await getAllUsers();
+    const usersCount = users.length;
     return (
         <div className={styles.dashboard}>
             <div className={styles.statsGrid}>
@@ -8,7 +10,7 @@ export default function Dashboard() {
                     <div className={styles.statIcon}>👥</div>
                     <div className={styles.statInfo}>
                         <h3>Usuarios</h3>
-                        <p className={styles.statNumber}>1,234</p>
+                        <p className={styles.statNumber}>{usersCount}</p>
                         <span className={styles.statChange}>+12% este mes</span>
                     </div>
                 </div>
