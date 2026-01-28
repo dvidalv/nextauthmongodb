@@ -10,9 +10,6 @@ export default function HeaderNav({ isLoggedIn }) {
 
     const navItems = [
         { label: "Inicio", href: "/" },
-        { label: "Nosotros", href: "/nosotros" },
-        { label: "Servicios", href: "/servicios" },
-        { label: "Clientes", href: "/clientes" },
         { label: "Contacto", href: "/contacto" },
     ];
 
