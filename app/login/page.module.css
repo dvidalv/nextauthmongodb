@@ -168,6 +168,53 @@
   to { transform: rotate(360deg); }
 }
 
+.resendSection {
+  margin-top: 25px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.resendTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.resendForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resendButton {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.resendButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.resendButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .registerLink {
   text-align: center;
   margin-top: 25px;
@@ -275,5 +322,22 @@
 
   .registerLink a:hover {
     color: #a78bfa;
+  }
+
+  .resendSection {
+    background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+    border-color: #92400e;
+  }
+
+  .resendTitle {
+    color: #fbbf24;
+  }
+
+  .resendButton {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+
+  .resendButton:hover:not(:disabled) {
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
   }
 }

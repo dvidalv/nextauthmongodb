@@ -48,6 +48,14 @@ const userSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        verificationToken: {
+            type: String,
+            select: false, // No mostrar en las consultas por defecto
+        },
+        verificationTokenExpires: {
+            type: Date,
+            select: false, // No mostrar en las consultas por defecto
+        },
     },
     {
         timestamps: true,

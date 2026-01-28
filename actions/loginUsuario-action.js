@@ -8,6 +8,19 @@ export async function loginUsuario(prevState, formData) {
   const callbackUrl = formData.get("callbackUrl") || "/dashboard";
 
   try {
+    // Primero verificar si el usuario existe y está verificado
+    // Esto lo hacemos importando el modelo directamente
+    const User = (await import("@/app/models/user")).default;
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    
+    if (user && !user.isVerified) {
+      return { 
+        error: "Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada.", 
+        success: null, 
+        redirect: null 
+      };
+    }
+
     // Usar NextAuth signIn con el provider de credentials
     const result = await signIn("credentials", {
       email,

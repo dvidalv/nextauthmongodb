@@ -19,7 +19,10 @@ export async function crearUsuario(prevState, formData) {
             const msg = response.data?.error || response.data?.details?.join?.(", ") || "Error al crear el usuario";
             return { error: msg, success: null };
         }
-        return { success: "Usuario creado correctamente", error: null };
+        return { 
+            success: "¡Cuenta creada! Por favor verifica tu email para activar tu cuenta.", 
+            error: null 
+        };
     } catch (err) {
         const msg = err.response?.data?.error || err.response?.data?.details?.join?.(", ") || err.message || "Error al crear el usuario";
         return { error: msg, success: null };

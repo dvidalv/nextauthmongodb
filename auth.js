@@ -37,6 +37,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null
           }
 
+          // Verificar si el email está verificado
+          // Esta verificación la hacemos en el action antes de llamar a signIn
+          // para poder mostrar un mensaje más específico
+          if (!user.isVerified) {
+            // Email no verificado - retornar null
+            return null
+          }
+
           // Convert to object and remove password before returning
           const userObject = user.toObject()
           delete userObject.password
