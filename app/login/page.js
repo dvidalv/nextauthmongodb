@@ -1,24 +1,21 @@
 "use client";
 import styles from "./page.module.css";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { loginUsuario } from "@/actions/loginUsuario-action";
 
-export default function Login() {
+function LoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"; 
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const verified = searchParams.get("verified");
   const errorParam = searchParams.get("error");
-  
-  const [state, action, isPending] = useActionState(
-    loginUsuario,
-    {
-      error: null,
-      success: null,
-      redirect: null,
-    }
-  );
+
+  const [state, action, isPending] = useActionState(loginUsuario, {
+    error: null,
+    success: null,
+    redirect: null,
+  });
 
   const [resendEmail, setResendEmail] = useState("");
   const [resendMessage, setResendMessage] = useState(null);
@@ -27,13 +24,25 @@ export default function Login() {
   // Mensajes de verificación
   let verificationMessage = null;
   if (verified === "true") {
-    verificationMessage = { type: "success", text: "¡Email verificado correctamente! Ya puedes iniciar sesión." };
+    verificationMessage = {
+      type: "success",
+      text: "¡Email verificado correctamente! Ya puedes iniciar sesión.",
+    };
   } else if (errorParam === "token-missing") {
-    verificationMessage = { type: "error", text: "Token de verificación no proporcionado." };
+    verificationMessage = {
+      type: "error",
+      text: "Token de verificación no proporcionado.",
+    };
   } else if (errorParam === "token-invalid") {
-    verificationMessage = { type: "error", text: "Token de verificación inválido o expirado." };
+    verificationMessage = {
+      type: "error",
+      text: "Token de verificación inválido o expirado.",
+    };
   } else if (errorParam === "verification-failed") {
-    verificationMessage = { type: "error", text: "Error al verificar el email. Por favor intenta de nuevo." };
+    verificationMessage = {
+      type: "error",
+      text: "Error al verificar el email. Por favor intenta de nuevo.",
+    };
   }
 
   // Función para reenviar email de verificación
@@ -59,10 +68,16 @@ export default function Login() {
         setResendMessage({ type: "success", text: data.message });
         setResendEmail("");
       } else {
-        setResendMessage({ type: "error", text: data.error || "Error al enviar el email" });
+        setResendMessage({
+          type: "error",
+          text: data.error || "Error al enviar el email",
+        });
       }
     } catch (error) {
-      setResendMessage({ type: "error", text: "Error al enviar el email de verificación" });
+      setResendMessage({
+        type: "error",
+        text: "Error al enviar el email de verificación",
+      });
     } finally {
       setIsResending(false);
     }
@@ -101,7 +116,12 @@ export default function Login() {
         </form>
         <div className={styles.messages}>
           {verificationMessage && (
-            <p className={verificationMessage.type === "success" ? styles.success : styles.error}>
+            <p
+              className={
+                verificationMessage.type === "success"
+                  ? styles.success
+                  : styles.error
+              }>
               {verificationMessage.text}
             </p>
           )}
@@ -114,7 +134,9 @@ export default function Login() {
         {isEmailNotVerified && (
           <div className={styles.resendSection}>
             <p className={styles.resendTitle}>¿No recibiste el email?</p>
-            <form onSubmit={handleResendVerification} className={styles.resendForm}>
+            <form
+              onSubmit={handleResendVerification}
+              className={styles.resendForm}>
               <input
                 type="email"
                 value={resendEmail}
@@ -123,16 +145,20 @@ export default function Login() {
                 className={styles.input}
                 required
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className={styles.resendButton}
-                disabled={isResending}
-              >
+                disabled={isResending}>
                 {isResending ? "Enviando..." : "Reenviar Email"}
               </button>
             </form>
             {resendMessage && (
-              <p className={resendMessage.type === "success" ? styles.success : styles.error}>
+              <p
+                className={
+                  resendMessage.type === "success"
+                    ? styles.success
+                    : styles.error
+                }>
                 {resendMessage.text}
               </p>
             )}
@@ -144,5 +170,20 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.login}>
+          <div className={styles.formContainer}>
+            <h1 className={styles.title}>Cargando...</h1>
+          </div>
+        </div>
+      }>
+      <LoginForm />
+    </Suspense>
   );
 }

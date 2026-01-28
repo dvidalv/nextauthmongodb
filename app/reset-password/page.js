@@ -1,13 +1,13 @@
 "use client";
 import styles from "./page.module.css";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState(null);
@@ -22,7 +22,7 @@ export default function ResetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!token) {
       setMessage({ type: "error", text: "Token no proporcionado" });
       return;
@@ -34,7 +34,10 @@ export default function ResetPassword() {
     }
 
     if (password.length < 8) {
-      setMessage({ type: "error", text: "La contraseña debe tener al menos 8 caracteres" });
+      setMessage({
+        type: "error",
+        text: "La contraseña debe tener al menos 8 caracteres",
+      });
       return;
     }
 
@@ -56,13 +59,16 @@ export default function ResetPassword() {
         setMessage({ type: "success", text: data.message });
         setPassword("");
         setConfirmPassword("");
-        
+
         // Redirigir al login después de 3 segundos
         setTimeout(() => {
           window.location.href = "/login";
         }, 3000);
       } else {
-        setMessage({ type: "error", text: data.error || "Error al resetear la contraseña" });
+        setMessage({
+          type: "error",
+          text: data.error || "Error al resetear la contraseña",
+        });
       }
     } catch (error) {
       setMessage({ type: "error", text: "Error al procesar la solicitud" });
@@ -89,10 +95,8 @@ export default function ResetPassword() {
     <div className={styles.resetPassword}>
       <div className={styles.formContainer}>
         <h1 className={styles.title}>Resetear Contraseña</h1>
-        <p className={styles.subtitle}>
-          Ingresa tu nueva contraseña
-        </p>
-        
+        <p className={styles.subtitle}>Ingresa tu nueva contraseña</p>
+
         <form className={styles.form} onSubmit={handleSubmit}>
           <div>
             <input
@@ -106,7 +110,7 @@ export default function ResetPassword() {
             />
             <p className={styles.hint}>Mínimo 8 caracteres</p>
           </div>
-          
+
           <div>
             <input
               type="password"
@@ -120,19 +124,21 @@ export default function ResetPassword() {
               <p className={styles.errorHint}>Las contraseñas no coinciden</p>
             )}
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className={styles.submitButton}
-            disabled={isLoading || !passwordsMatch}
-          >
+            disabled={isLoading || !passwordsMatch}>
             {isLoading ? "Reseteando..." : "Resetear contraseña"}
           </button>
         </form>
 
         {message && (
           <div className={styles.messages}>
-            <p className={message.type === "success" ? styles.success : styles.error}>
+            <p
+              className={
+                message.type === "success" ? styles.success : styles.error
+              }>
               {message.text}
             </p>
           </div>
@@ -143,5 +149,20 @@ export default function ResetPassword() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.resetPassword}>
+          <div className={styles.formContainer}>
+            <h1 className={styles.title}>Cargando...</h1>
+          </div>
+        </div>
+      }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
