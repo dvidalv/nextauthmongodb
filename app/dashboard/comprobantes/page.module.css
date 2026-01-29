@@ -1,0 +1,7 @@
+.usuarios {
+    height: calc(100vh - var(--headerHeight));
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}   
+    

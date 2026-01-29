@@ -11,7 +11,7 @@ export default function Sidebar({ user }) {
     ...(role === "admin"
       ? [{ label: "Usuarios", href: "/dashboard/usuarios", icon: "👥" }]
       : []),
-    { label: "Productos", href: "/dashboard/productos", icon: "📦" },
+      { label: "Comprobantes", href: "/dashboard/comprobantes", icon: "🔳" },
     { label: "Reportes", href: "/dashboard/reportes", icon: "📊" },
     { label: "Configuración", href: "/dashboard/configuracion", icon: "⚙️" },
   ];

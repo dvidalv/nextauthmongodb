@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Sidebar from "@/components/dashboard/Sidebar";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
+// import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import styles from "./layout.module.css";
 import { redirect } from "next/navigation";
 
@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }) {
       <Sidebar user={user} />
 
       <div className={styles.mainContent}>
-        <DashboardHeader user={user} />
+
 
         <main className={styles.content}>
           {children}
