@@ -9,6 +9,7 @@ import {
 } from 'react-icons/io5';
 import Image from 'next/image';
 import './Footer.css';
+import logo from "@/public/logo.png";
 
 function Footer() {
 
@@ -18,12 +19,14 @@ function Footer() {
 				{/* Column 1: Brand & About */}
 				<div className="footer_column brand_column">
 					<Image 
-						src="/logo.png" 
+						src={logo} 
 						alt="Giganet Logo" 
-						width={50} 
-						height={50} 
+						width={170} 
+						height={70} 
 						style={{ width: 'auto', height: 'auto' }}
 						className="footer_logo" 
+						priority
+						loading="eager"
 					/>
 					<p className="footer_description">
 						Desarrollamos soluciones tecnológicas a tu medida. 
