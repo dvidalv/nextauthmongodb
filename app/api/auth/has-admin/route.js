@@ -9,7 +9,7 @@ import User from "@/app/models/user";
 export async function GET() {
   try {
     const admin = await User.exists({ role: "admin" });
-    return NextResponse.json({ hasAdmin: !!admin });
+    return NextResponse.json({ hasAdmin: !!admin }); 
   } catch (error) {
     console.error("Error al comprobar si hay admin:", error);
     return NextResponse.json(
