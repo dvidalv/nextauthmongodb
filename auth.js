@@ -50,11 +50,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
 
-          // Verificar si el email está verificado
-          // Esta verificación la hacemos en el action antes de llamar a signIn
-          // para poder mostrar un mensaje más específico
-          if (!user.isVerified) {
-            // Email no verificado - retornar null
+          // Solo usuarios con email verificado pueden entrar (incluye admins)
+          if (user.isVerified !== true) {
+            return null;
+          }
+
+          // Solo usuarios activos pueden iniciar sesión
+          if (user.isActive === false) {
             return null;
           }
 

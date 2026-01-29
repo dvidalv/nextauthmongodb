@@ -7,7 +7,7 @@ import styles from "./DashboardHeader.module.css";
 export default function DashboardHeader({ user }) {
     const router = useRouter();
     const [isSigningOut, setIsSigningOut] = useState(false);
-
+ 
     const handleSignOut = async () => {
         try {
             setIsSigningOut(true);

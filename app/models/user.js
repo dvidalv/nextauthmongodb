@@ -48,6 +48,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: false, // Por defecto no está verificado
     },
+    isActive: {
+      type: Boolean,
+      default: true, // Por defecto el usuario está activo
+    },
     verificationToken: {
       type: String,
       select: false, // No mostrar en las consultas por defecto

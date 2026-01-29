@@ -12,12 +12,22 @@ export async function loginUsuario(prevState, formData) {
     // Esto lo hacemos importando el modelo directamente
     const User = (await import("@/app/models/user")).default;
     const user = await User.findOne({ email: email.toLowerCase().trim() });
-    
-    if (user && !user.isVerified) {
-      return { 
-        error: "Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada.", 
-        success: null, 
-        redirect: null 
+
+    // Solo usuarios con email verificado pueden entrar (incluye admins)
+    if (user && user.isVerified !== true) {
+      return {
+        error:
+          "Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada.",
+        success: null,
+        redirect: null,
+      };
+    }
+
+    if (user && user.isActive === false) {
+      return {
+        error: "Tu cuenta está desactivada. Contacta al administrador.",
+        success: null,
+        redirect: null,
       };
     }
 
@@ -40,7 +50,7 @@ export async function loginUsuario(prevState, formData) {
     if (error?.message === "NEXT_REDIRECT") {
       throw error;
     }
-    
+
     console.error("Error en loginUsuario:", error);
     return { error: "Error al iniciar sesión", success: null, redirect: null };
   }
