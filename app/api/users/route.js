@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { auth } from "@/auth";
 import User, { getAllUsers, countUsers } from "@/app/models/user";
 import { passwordHash } from "@/utils/utils";
+import { sendEmail } from "@/api-mail_brevo";
 import crypto from "crypto";
 
 const SELECT =
@@ -127,6 +129,39 @@ export async function POST(request) {
       verificationToken,
       verificationTokenExpires,
     });
+
+    const userName = String(name).trim();
+    const h = await headers();
+    const host = h.get("host");
+    const proto = h.get("x-forwarded-proto") ?? "http";
+    const baseUrl = `${proto}://${host}`;
+
+    try {
+      const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}`;
+      await sendEmail({
+        to: emailNorm,
+        subject: "Verifica tu cuenta",
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">¡Bienvenido ${userName}!</h2>
+            <p>Gracias por registrarte. Por favor, verifica tu correo electrónico haciendo clic en el siguiente enlace:</p>
+            <a href="${verificationUrl}" 
+               style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">
+              Verificar Email
+            </a>
+            <p style="color: #666; font-size: 14px;">
+              Este enlace expirará en 24 horas.
+            </p>
+            <p style="color: #666; font-size: 14px;">
+              Si no creaste esta cuenta, puedes ignorar este email.
+            </p>
+          </div>
+        `,
+        textContent: `Bienvenido ${userName}! Por favor verifica tu email visitando: ${verificationUrl}`,
+      });
+    } catch (emailError) {
+      console.error("Error al enviar email de verificación:", emailError);
+    }
 
     const u = user.toObject();
     delete u.password;

@@ -2,19 +2,37 @@
 import { signIn } from "@/auth";
 import { redirect } from "next/navigation";
 
+const CREDENTIALS_MSG =
+  "Email o contraseña incorrectos. Verifica tus datos e intenta de nuevo.";
+
 export async function loginUsuario(prevState, formData) {
   const email = formData.get("email");
   const password = formData.get("password");
   const callbackUrl = formData.get("callbackUrl") || "/dashboard";
 
-  try {
-    // Primero verificar si el usuario existe y está verificado
-    // Esto lo hacemos importando el modelo directamente
-    const User = (await import("@/app/models/user")).default;
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+  if (!email?.trim() || !password) {
+    return {
+      error: CREDENTIALS_MSG,
+      success: null,
+      redirect: null,
+    };
+  }
 
-    // Solo usuarios con email verificado pueden entrar (incluye admins)
-    if (user && user.isVerified !== true) {
+  try {
+    const User = (await import("@/app/models/user")).default;
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+    // Usuario no existe → mismo mensaje que contraseña incorrecta (seguridad)
+    if (!user) {
+      return {
+        error: CREDENTIALS_MSG,
+        success: null,
+        redirect: null,
+      };
+    }
+
+    // Solo usuarios con email verificado pueden entrar
+    if (user.isVerified !== true) {
       return {
         error:
           "Por favor verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada.",
@@ -23,7 +41,7 @@ export async function loginUsuario(prevState, formData) {
       };
     }
 
-    if (user && user.isActive === false) {
+    if (user.isActive === false) {
       return {
         error: "Tu cuenta está desactivada. Contacta al administrador.",
         success: null,
@@ -31,27 +49,36 @@ export async function loginUsuario(prevState, formData) {
       };
     }
 
-    // Usar NextAuth signIn con el provider de credentials
     const result = await signIn("credentials", {
-      email,
+      email: email.trim(),
       password,
-      redirect: false, // No redirigir automáticamente, manejarlo manualmente
+      redirect: false,
     });
 
     if (result?.error) {
-      // Si hay error, retornar el mensaje de error
-      return { error: "Credenciales inválidas", success: null, redirect: null };
+      return { error: CREDENTIALS_MSG, success: null, redirect: null };
     }
 
-    // Si el login es exitoso, redirigir directamente desde el servidor
     redirect(callbackUrl);
   } catch (error) {
-    // Si el error es de redirect, dejarlo pasar (es el comportamiento esperado)
     if (error?.message === "NEXT_REDIRECT") {
       throw error;
     }
 
+    const isCredentialsError =
+      error?.type === "CredentialsSignin" ||
+      error?.code === "credentials" ||
+      error?.name === "CredentialsSignin";
+
+    if (isCredentialsError) {
+      return { error: CREDENTIALS_MSG, success: null, redirect: null };
+    }
+
     console.error("Error en loginUsuario:", error);
-    return { error: "Error al iniciar sesión", success: null, redirect: null };
+    return {
+      error: "Error al iniciar sesión. Intenta de nuevo en unos momentos.",
+      success: null,
+      redirect: null,
+    };
   }
 }

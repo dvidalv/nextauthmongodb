@@ -46,15 +46,19 @@ export async function POST(request) {
     }
 
     const hashedPassword = passwordHash(password);
-    
+
+    // El primer usuario registrado será administrador
+    const isFirstUser = (await User.countDocuments()) === 0;
+
     // Generar token de verificación
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
-    
+
     const user = await User.create({
       email,
       password: hashedPassword,
       name: name.trim(),
+      role: isFirstUser ? "admin" : "user",
       verificationToken,
       verificationTokenExpires,
     });
@@ -63,11 +67,11 @@ export async function POST(request) {
     const host = h.get("host");
     const proto = h.get("x-forwarded-proto") ?? "http";
     const baseUrl = `${proto}://${host}`;
-    
+
     // Enviar email de verificación
     try {
       const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}`;
-      
+
       await sendEmail({
         to: email,
         subject: "Verifica tu cuenta",
@@ -93,17 +97,17 @@ export async function POST(request) {
       console.error("Error al enviar email de verificación:", emailError);
       // No fallar el registro si el email falla, solo loggear el error
     }
-    
+
     // Convertir a objeto y eliminar el password antes de retornar
     const userObject = user.toObject(); // Convertir a objeto
     delete userObject.password; // Eliminar el password antes de retornar
     delete userObject.verificationToken; // No exponer el token
     delete userObject.verificationTokenExpires;
-    
+
     return NextResponse.json(
-      { 
-        message: "Usuario creado correctamente. Por favor verifica tu email.", 
-        user: userObject 
+      {
+        message: "Usuario creado correctamente. Por favor verifica tu email.",
+        user: userObject,
       },
       { status: 201 },
     );
