@@ -1,15 +1,56 @@
 "use client";
 import styles from "./page.module.css";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { crearUsuario } from "@/actions/crearUsuario-action";
+
 export default function Register() {
+  const router = useRouter();
+  const [canRegister, setCanRegister] = useState(null); // null = cargando, true = no hay admin, false = hay admin
+
+  useEffect(() => {
+    fetch("/api/auth/has-admin")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.hasAdmin === true) {
+          router.replace("/login");
+          setCanRegister(false);
+        } else {
+          setCanRegister(true);
+        }
+      })
+      .catch(() => setCanRegister(true)); // en error, permitir ver el formulario
+  }, [router]);
+
   const [state, action, isPending] = useActionState(crearUsuario, {
     values: { name: "", email: "", password: "" },
     errors: { name: null, email: null, password: null },
     success: null,
     error: null,
   });
+
+  // Mientras se comprueba si hay admin o ya hay admin, no mostrar el formulario
+  if (canRegister === null) {
+    return (
+      <div className={styles.register}>
+        <div className={styles.formContainer}>
+          <h1 className={styles.title}>Cargando...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (canRegister === false) {
+    return (
+      <div className={styles.register}>
+        <div className={styles.formContainer}>
+          <h1 className={styles.title}>Redirigiendo...</h1>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.register}>
       <div className={styles.formContainer}>

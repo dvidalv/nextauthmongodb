@@ -7,7 +7,7 @@ import { sendEmail } from "@/api-mail_brevo";
 import crypto from "crypto";
 
 const SELECT =
-  "-password -verificationToken -verificationTokenExpires -resetPasswordToken -resetPasswordExpires";
+  "-password -verificationToken -verificationTokenExpires -resetPasswordToken -resetPasswordExpires"; // Campos que se excluyen de la respuesta
 
 async function requireAdmin() {
   const session = await auth();
