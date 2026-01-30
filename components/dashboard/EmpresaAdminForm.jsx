@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatPhoneNumber, formatPhoneNumberRealtime } from "@/utils/phoneUtils";
 import styles from "@/app/dashboard/empresa/page.module.css";
 
@@ -75,6 +76,11 @@ const IconArrowLeft = () => (
 
 const ALLOWED_LOGO_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_LOGO_SIZE = 5 * 1024 * 1024; // 5 MB
+
+/** true si la URL es http(s) y next/image puede optimizarla; false para blob/data. */
+function isRemoteLogoUrl(src) {
+  return typeof src === "string" && (src.startsWith("http://") || src.startsWith("https://"));
+}
 
 export default function EmpresaAdminForm({ userId }) {
   const [empresa, setEmpresa] = useState(EMPRESA_DEFAULTS);
@@ -380,11 +386,26 @@ export default function EmpresaAdminForm({ userId }) {
               <div className={styles.logoSection}>
                 <div className={styles.logoPreviewWrap}>
                   {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Vista previa del logo"
-                      className={styles.logoPreview}
-                    />
+                    isRemoteLogoUrl(logoPreview) ? (
+                      <Image
+                        src={logoPreview}
+                        alt="Vista previa del logo"
+                        width={140}
+                        height={140}
+                        className={styles.logoPreview}
+                        sizes="140px"
+                        priority
+                        loading="eager"
+                        
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element -- blob/data URLs no soportados por next/image
+                      <img
+                        src={logoPreview}
+                        alt="Vista previa del logo"
+                        className={styles.logoPreview}
+                      />
+                    )
                   ) : (
                     <div className={styles.logoPlaceholder}>
                       <IconLink />
