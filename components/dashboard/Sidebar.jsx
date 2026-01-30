@@ -6,13 +6,19 @@ import styles from "./Sidebar.module.css";
 export default function Sidebar({ user }) {
   const { name, email, role } = user;
   const pathname = usePathname();
+  
   const navItems = [
     { label: "Dashboard", href: "/dashboard", icon: "🏠" },
     ...(role === "admin"
-      ? [{ label: "Usuarios", href: "/dashboard/usuarios", icon: "👥" }]
+      ? [
+          { label: "Usuarios", href: "/dashboard/usuarios", icon: "👥" },
+          { label: "Empresas", href: "/dashboard/empresas", icon: "🏢" },
+        ]
       : []),
-      { label: "Comprobantes", href: "/dashboard/comprobantes", icon: "🔳" },
-      { label: "Mi Empresa", href: "/dashboard/empresa", icon: "🏢" },
+    { label: "Comprobantes", href: "/dashboard/comprobantes", icon: "🔳" },
+    ...(role !== "admin"
+      ? [{ label: "Mi Empresa", href: "/dashboard/empresa", icon: "🏢" }]
+      : []),
     { label: "Reportes", href: "/dashboard/reportes", icon: "📊" },
     { label: "Configuración", href: "/dashboard/configuracion", icon: "⚙️" },
   ];
