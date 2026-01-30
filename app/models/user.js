@@ -1,22 +1,19 @@
 import { Schema, model, models } from "mongoose";
 import { connectDB } from "@/lib/mongoDB";
 
-// Variable para rastrear si ya se intentó conectar
-let connectionInitiated = false;
+// Promesa compartida: todos los callers esperan la misma conexión (evita race)
+let connectionPromise = null;
 
-// Función para asegurar la conexión a la base de datos
 const ensureConnection = async () => {
-  // Verificar si ya está conectado
   const mongoose = await import("mongoose");
   if (mongoose.default.connection.readyState === 1) {
     return;
   }
 
-  // Conectar solo una vez
-  if (!connectionInitiated) {
-    connectionInitiated = true;
-    await connectDB();
+  if (!connectionPromise) {
+    connectionPromise = connectDB();
   }
+  await connectionPromise;
 };
 
 const userSchema = new Schema(
