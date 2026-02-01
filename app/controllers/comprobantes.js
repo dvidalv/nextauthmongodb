@@ -1,6 +1,57 @@
+/**
+ * Controladores de comprobantes (e-CF, TheFactoryHKA).
+ * Origen: Express. Preparados para usarse también desde Next.js mediante el adaptador.
+ *
+ * Uso desde Next.js (app/api/.../route.js):
+ *   import { runWithNext } from '@/lib/nextControllerAdapter';
+ *   import { createComprobante } from '@/app/controllers/comprobantes';
+ *   export async function POST(request) {
+ *     return runWithNext(createComprobante, request, { requireAuth: true });
+ *   }
+ *
+ * Requisito: cada handler debe hacer "return res.status(...).json(...)" para que
+ * runWithNext pueda devolver la NextResponse.
+ *
+ * Handlers que requieren sesión (requireAuth: true): createComprobante, getComprobanteById,
+ * updateComprobante, updateComprobanteEstado, deleteComprobante, getComprobantesStats,
+ * consumirNumero, enviarFacturaElectronica, enviarEmailFactura, anularComprobantes, descargarArchivo.
+ * consumirNumeroPorRnc usa API Key (no sesión); limpiarTokenCache y verificarServidorTheFactory no requieren auth.
+ */
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import { Comprobante } from '@/app/models/comprobante';
+import User from '@/app/models/user';
+import { hashApiKey } from '@/utils/apiKey';
 import axios from 'axios';
+
+const TIPOS_COMPROBANTE = ['31', '32', '33', '34', '41', '43', '44', '45'];
+const RNC_MIN = 9;
+const RNC_MAX = 11;
+
+function getApiKeyFromRequest(req) {
+  const authHeader = req.headers?.authorization;
+  const bearer = authHeader?.replace(/^Bearer\s+/i, '').trim();
+  if (bearer) return bearer;
+  return req.headers?.['x-api-key']?.trim() ?? null;
+}
+
+async function getUserIdByApiKey(apiKey) {
+  if (!apiKey) return null;
+  const keyHash = hashApiKey(apiKey);
+  if (!keyHash) return null;
+  const user = await User.findOne({ apiKeyHash: keyHash }).select('_id').lean();
+  return user?._id?.toString() ?? null;
+}
+
+function formatFechaVencimiento(fecha) {
+  if (!fecha) return null;
+  const d = new Date(fecha);
+  if (isNaN(d.getTime())) return null;
+  const dia = d.getDate().toString().padStart(2, '0');
+  const mes = (d.getMonth() + 1).toString().padStart(2, '0');
+  const año = d.getFullYear();
+  return `${dia}-${mes}-${año}`;
+}
 import QRCode from 'qrcode';
 import { sendEmail } from '@/api-mail_brevo';
 import {
@@ -1161,100 +1212,94 @@ const consumirNumero = async (req, res) => {
   }
 };
 
-// Consumir un número por RNC y tipo de comprobante
+// Consumir un número por RNC y tipo de comprobante (igual lógica que POST /api/comprobantes/solicitar-numero)
+// Requiere API Key en Authorization: Bearer <api_key> o header x-api-key; filtra por usuario dueño de la key.
 const consumirNumeroPorRnc = async (req, res) => {
   try {
-    const { rnc, tipo_comprobante } = req.body;
-    console.log('🔍 Datos recibidos en consumirNumeroPorRnc:', req.body);
+    const apiKey = getApiKeyFromRequest(req);
+    if (!apiKey) {
+      return res.status(httpStatus.UNAUTHORIZED).json({ error: 'No autorizado' });
+    }
 
-    // Validar que se proporcionen los datos requeridos
-    if (!rnc || !tipo_comprobante) {
+    const userId = await getUserIdByApiKey(apiKey);
+    if (!userId) {
+      return res.status(httpStatus.UNAUTHORIZED).json({ error: 'No autorizado' });
+    }
+
+    const body = req.body || {};
+    const rncRaw =
+      body.rnc != null ? String(body.rnc).replace(/\D/g, '').trim() : '';
+    const tipo_comprobante =
+      body.tipo_comprobante != null ? String(body.tipo_comprobante).trim() : '';
+    const solo_preview = Boolean(body.solo_preview);
+
+    if (!rncRaw || rncRaw.length < RNC_MIN || rncRaw.length > RNC_MAX) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        status: 'error',
-        message: 'RNC y tipo de comprobante son requeridos',
+        error: 'RNC inválido (debe tener entre 9 y 11 dígitos)',
+      });
+    }
+    if (!TIPOS_COMPROBANTE.includes(tipo_comprobante)) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        error:
+          'Tipo de comprobante inválido. Debe ser: 31, 32, 33, 34, 41, 43, 44, 45',
       });
     }
 
-    // console.log(rnc, tipo_comprobante);
-
-    // Construir query base
     const query = {
-      rnc: rnc,
-      tipo_comprobante: tipo_comprobante,
-      estado: { $in: ['activo', 'alerta'] }, // Incluir rangos activos y en alerta
-      numeros_disponibles: { $gt: 0 }, // Verificar que haya números disponibles
+      usuario: new mongoose.Types.ObjectId(userId),
+      rnc: rncRaw,
+      tipo_comprobante,
+      estado: { $in: ['activo', 'alerta'] },
+      numeros_disponibles: { $gt: 0 },
     };
 
-    // Agregar filtro de fecha de vencimiento SOLO si el tipo lo requiere
-    // Tipos 32 y 34 NO tienen fecha de vencimiento obligatoria
     if (!['32', '34'].includes(tipo_comprobante)) {
       query.$or = [
-        { fecha_vencimiento: { $gte: new Date() } }, // No vencido
-        { fecha_vencimiento: null }, // O sin fecha (permitir por si acaso)
+        { fecha_vencimiento: { $gte: new Date() } },
+        { fecha_vencimiento: null },
       ];
     }
 
-    // Buscar un rango activo y válido para este RNC y tipo de comprobante (SIN filtrar por usuario)
-    const rango = await Comprobante.findOne(query).sort({ fechaCreacion: 1 }); // Usar el rango más antiguo primero (schema: fechaCreacion)
-
-    // console.log('🔍 Query ejecutada:', JSON.stringify(query, null, 2));
-    // console.log('📊 Rango encontrado:', rango ? 'SÍ' : 'NO');
+    const rango = await Comprobante.findOne(query)
+      .sort({ fechaCreacion: 1 })
+      .exec();
 
     if (!rango) {
-      // console.log('❌ No se encontró ningún rango con el query');
       return res.status(httpStatus.NOT_FOUND).json({
-        status: 'error',
-        message:
-          'No se encontró un rango activo disponible para este RNC y tipo de comprobante',
+        error: 'Secuencia no encontrada o no autorizada',
       });
     }
 
-    // console.log('📋 Datos del rango encontrado:', {
-    //   _id: rango._id,
-    //   rnc: rango.rnc,
-    //   tipo_comprobante: rango.tipo_comprobante,
-    //   estado: rango.estado,
-    //   fecha_vencimiento: rango.fecha_vencimiento,
-    //   numeros_disponibles: rango.numeros_disponibles,
-    //   numeros_utilizados: rango.numeros_utilizados,
-    // });
-
-    // Verificar que el rango sea válido
-    const esValidoCheck = rango.esValido();
-    // console.log('✅ Verificación esValido():', esValidoCheck);
-
-    if (!esValidoCheck) {
-      // console.log('❌ El rango NO pasó la validación esValido()');
+    if (!rango.esValido()) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        status: 'error',
-        message: 'El rango no está disponible (vencido, agotado o inactivo)',
+        error:
+          'El rango no está disponible (vencido, agotado o inactivo)',
       });
     }
 
-    await rango.consumirNumero(); // Consumir el número
+    const fechaVencimiento = formatFechaVencimiento(rango.fecha_vencimiento);
 
-    // Calcular el número que se acaba de consumir
+    if (solo_preview) {
+      const proximoNumero = rango.numero_inicial + rango.numeros_utilizados;
+      const numeroFormateado = rango.formatearNumeroECF(proximoNumero);
+      return res.status(httpStatus.OK).json({
+        status: 'success',
+        message: 'Próximo número (sin consumir)',
+        data: {
+          proximoNumero,
+          numeroFormateado,
+          numerosDisponibles: rango.numeros_disponibles,
+          estadoRango: rango.estado,
+          fechaVencimiento,
+        },
+      });
+    }
+
+    await rango.consumirNumero();
     const numeroConsumido = rango.numero_inicial + rango.numeros_utilizados - 1;
-
-    // Formatear el número según estructura e-CF
     const numeroFormateado = rango.formatearNumeroECF(numeroConsumido);
 
-    // Formatear fecha de vencimiento a formato DD-MM-YYYY
-    // Para tipos 32 y 34 que no tienen fecha de vencimiento, devolver null o string vacío
-    let fechaVencimientoFormateada = null;
-    if (rango.fecha_vencimiento) {
-      const fechaVenc = new Date(rango.fecha_vencimiento);
-      const dia = fechaVenc.getDate().toString().padStart(2, '0');
-      const mes = (fechaVenc.getMonth() + 1).toString().padStart(2, '0');
-      const año = fechaVenc.getFullYear();
-      fechaVencimientoFormateada = `${dia}-${mes}-${año}`;
-    }
-
-    // Determinar alerta de agotamiento para FileMaker
-    const alertaAgotamiento =
-      rango.estado === 'alerta' || rango.estado === 'agotado';
     let mensajeAlerta = null;
-
     if (rango.estado === 'agotado') {
       mensajeAlerta =
         'ÚLTIMO COMPROBANTE USADO - Solicitar nuevo rango urgente';
@@ -1262,44 +1307,32 @@ const consumirNumeroPorRnc = async (req, res) => {
       mensajeAlerta = `Quedan ${rango.numeros_disponibles} comprobantes - Solicitar nuevo rango pronto`;
     }
 
-    const respuesta = {
+    return res.status(httpStatus.OK).json({
       status: 'success',
       message: 'Número consumido exitosamente',
       data: {
-        numeroConsumido: numeroConsumido,
-        numeroFormateado: numeroFormateado,
+        numeroConsumido,
+        numeroFormateado,
         numerosDisponibles: rango.numeros_disponibles,
-        fechaVencimiento: fechaVencimientoFormateada,
         estadoRango: rango.estado,
-        alertaAgotamiento: alertaAgotamiento, // Bandera booleana para FileMaker
-        mensajeAlerta: mensajeAlerta, // Mensaje legible para mostrar al usuario
+        fechaVencimiento,
+        alertaAgotamiento:
+          rango.estado === 'alerta' || rango.estado === 'agotado',
+        mensajeAlerta,
         rnc: rango.rnc,
         tipoComprobante: rango.tipo_comprobante,
-        descripcion: rango.descripcion_tipo || '', // Descripción del tipo de comprobante
-        prefijo: rango.prefijo || '',
-        rangoId: rango._id,
+        prefijo: rango.prefijo ?? 'E',
       },
-    };
-
-    console.log(
-      '✅ RESPUESTA EXITOSA consumirNumeroPorRnc:',
-      JSON.stringify(respuesta, null, 2),
-    );
-
-    return res.status(httpStatus.OK).json(respuesta);
+    });
   } catch (err) {
-    console.error('Error al consumir número por RNC:', err);
-
-    if (err.message === 'No hay números disponibles en este rango') {
+    if (err.message?.includes('No hay números disponibles')) {
       return res.status(httpStatus.BAD_REQUEST).json({
-        status: 'error',
-        message: 'No hay números disponibles en el rango',
+        error: 'No hay números disponibles en el rango',
       });
     }
-
+    console.error('Error al consumir número por RNC:', err);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-      status: 'error',
-      message: 'Error interno del servidor',
+      error: 'Error al solicitar número',
     });
   }
 };
@@ -3239,7 +3272,7 @@ const descargarArchivo = async (req, res) => {
 // Endpoint para verificar el estado del servidor de TheFactoryHKA
 const verificarServidorTheFactory = async (req, res) => {
   try {
-    const { verificarEstadoTheFactory } = require('../utils/verificarTheFactory');
+    const { verificarEstadoTheFactory } = await import('@/utils/verificarTheFactory');
     const resultados = await verificarEstadoTheFactory();
 
     // Determinar código de estado HTTP según el resultado

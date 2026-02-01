@@ -14,15 +14,15 @@ export async function GET() {
 
   try {
     const user = await User.findById(session.user.id)
-      .select("+apiKeyHash")
-      .lean();
+      .select("+apiKeyHash") // + para incluir campos que no están en el schema
+      .lean(); // para evitar que Mongoose cachee el modelo
     if (!user) {
       return NextResponse.json(
         { error: "Usuario no encontrado" },
         { status: 404 }
       );
     }
-    const configured = Boolean(user.apiKeyHash);
+    const configured = Boolean(user.apiKeyHash); // user.apiKeyHash es undefined si no está en el schema
     return NextResponse.json({ configured });
   } catch (err) {
     console.error("GET /api/users/me/api-key:", err);
